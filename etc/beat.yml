@@ -1,0 +1,58 @@
+################### Redisbeat Configuration Example #########################
+
+############################# Input ############################################
+input:
+  # In seconds, defines how often to read server statistics
+  period: 10
+
+  # Host of redis server, default is localhost
+  host: "localhost"
+
+  # Port the redis server is listening on, default is 6379
+  port: 6379
+
+  # Network type, default is tcp
+  network: "tcp"
+
+  # Max connections for redis pool, default is 10
+  maxconn: 10
+
+  # Authentication config
+  auth:
+    # default is false
+    required: false
+    # default is empty string
+    required_pass: "p@ssw0rd"
+
+  # Statistics to collect (all enabled by default)
+  stats:
+    # server information
+    server: true
+
+    # clients information
+    clients: true 
+
+    # memory information
+    memory: true 
+
+    # persistence information
+    persistence: true
+
+    # stats information
+    stats: true
+
+    # replication information
+    replication: true
+    
+    # cpu information
+    cpu: true
+
+    # commandstats information
+    commandstats: true
+
+    # cluster information
+    cluster: true
+
+    # keyspace information
+    keyspace: true
+

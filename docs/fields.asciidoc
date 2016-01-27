@@ -1,0 +1,279 @@
+
+////
+This file is generated! See etc/fields.yml and scripts/generate_field_docs.py
+////
+
+[[exported-fields]]
+== Exported Fields
+
+This document describes the fields that are exported by 
+Redisbeat. They are grouped in the
+following categories:
+
+* <<exported-fields-env>>
+* <<exported-fields-server>>
+* <<exported-fields-clients>>
+* <<exported-fields-memory>>
+* <<exported-fields-persistence>>
+* <<exported-fields-stats>>
+* <<exported-fields-replication>>
+* <<exported-fields-cpu>>
+* <<exported-fields-commandstats>>
+* <<exported-fields-cluster>>
+* <<exported-fields-keyspace>>
+
+[[exported-fields-env]]
+=== Common Fields
+
+Contains common fields available in all event types.
+
+
+
+==== @timestamp
+
+type: date
+
+example: 2015-01-24 14:06:05.071000
+
+format: YYYY-MM-DDTHH:MM:SS.milliZ
+
+required: True
+
+The timestamp of when the measurements were taken. The precision is in milliseconds. The timezone is UTC.
+
+
+==== type
+
+required: True
+
+Set to "system" to indicate that the statistics are system-wide.
+
+
+==== count
+
+type: int
+
+required: True
+
+The number of transactions that this event represents. This is generally the inverse of the sampling rate. For example, for a sample rate of 1/10, the count is 10. The count is used by the UIs to return estimated values. Reserved for future usage.
+
+
+==== beat.name
+
+Name of the Beat sending the events. If the shipper name is set in the configuration file, then that value is used. If it is not set, the hostname is used.
+
+
+==== beat.hostname
+
+The hostname as returned by the operating system on which the Beat is running.
+
+
+[[exported-fields-server]]
+=== Redis Server Statistics Fields
+
+Contains server statistics. These statistics are returned from the redis command *INFO server*
+
+
+
+[[exported-fields-server]]
+=== Redis Server Statistics Fields
+
+General information about the Redis server
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of server stats
+
+
+[[exported-fields-clients]]
+=== Redis Client Statistics Fields
+
+Contains client statistics. These statistics are returned from the redis command *INFO clients*
+
+
+
+[[exported-fields-clients]]
+=== Redis Client Statistics Fields
+
+Client connections section
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of client stats
+
+
+[[exported-fields-memory]]
+=== Redis Memory Statistics Fields
+
+Contains server statistics. These statistics are returned from the redis command *INFO memory*
+
+
+
+[[exported-fields-memory]]
+=== Redis Memory Statistics Fields
+
+Memory consumption related information
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of memory stats
+
+
+[[exported-fields-persistence]]
+=== Redis Persistence Statistics Fields
+
+Contains persistence statistics. These statistics are returned from the redis command *INFO persistence*
+
+
+
+[[exported-fields-persistence]]
+=== Redis Persistence Statistics Fields
+
+RDB and AOF related information
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of persistence stats
+
+
+[[exported-fields-stats]]
+=== Redis Stats Statistics Fields
+
+Contains redis-stats statistics. These statistics are returned from the redis command *INFO stats*
+
+
+
+[[exported-fields-stats]]
+=== Redis Stats Statistics Fields
+
+General statistics
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of redis-stats stats
+
+
+[[exported-fields-replication]]
+=== Redis Replication Statistics Fields
+
+Contains replication statistics. These statistics are returned from the redis command *INFO replication*
+
+
+
+[[exported-fields-replication]]
+=== Redis Replication Statistics Fields
+
+Master/slave replication information
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of replication stats
+
+
+[[exported-fields-cpu]]
+=== Redis CPU Statistics Fields
+
+Contains cpu statistics. These statistics are returned from the redis command *INFO cpu*
+
+
+
+[[exported-fields-cpu]]
+=== Redis CPU Statistics Fields
+
+CPU consumption statistics
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of cpu stats
+
+
+[[exported-fields-commandstats]]
+=== Redis CommandStats Statistics Fields
+
+Contains command-stats statistics. These statistics are returned from the redis command *INFO commandstats*
+
+
+
+[[exported-fields-commandstats]]
+=== Redis CommandStats Statistics Fields
+
+Redis command statistics
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of command-stats stats
+
+
+[[exported-fields-cluster]]
+=== Redis Cluster Statistics Fields
+
+Contains cluster statistics. These statistics are returned from the redis command *INFO cluster*
+
+
+
+[[exported-fields-cluster]]
+=== Redis Cluster Statistics Fields
+
+Redis Cluster section
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of cluster stats
+
+
+[[exported-fields-keyspace]]
+=== Redis Keyspace Statistics Fields
+
+Contains keyspace statistics. These statistics are returned from the redis command *INFO keyspace*
+
+
+
+[[exported-fields-keyspace]]
+=== Redis Keyspace Statistics Fields
+
+Database related statistics
+
+
+
+==== stats
+
+type: object
+
+A *string => string* map of keyspace stats
+

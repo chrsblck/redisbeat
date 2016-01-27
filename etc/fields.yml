@@ -1,0 +1,197 @@
+version: 1.0
+
+defaults:
+  type: string
+  required: false
+  index: not_analyzed
+  doc_values: true
+  ignore_above: 1024
+
+env:
+  type: group
+  description: >
+    Contains common fields available in all event types.
+  fields:
+    - name: "@timestamp"
+      type: date
+      required: true
+      format: YYYY-MM-DDTHH:MM:SS.milliZ
+      example: 2015-01-24T14:06:05.071Z
+      description: >
+        The timestamp of when the measurements were taken. The precision is in milliseconds.
+        The timezone is UTC.
+
+    - name: type
+      description: >
+        Set to "system" to indicate that the statistics are system-wide.
+      required: true
+
+    - name: count
+      type: int
+      description: >
+        The number of transactions that this event represents. This
+        is generally the inverse of the sampling rate. For example, for
+        a sample rate of 1/10, the count is 10. The count is used by the
+        UIs to return estimated values. Reserved for future usage.
+      required: true
+ 
+    - name: beat.name
+      description: >
+        Name of the Beat sending the events. If the shipper name is set
+        in the configuration file, then that value is used. If it is not set,
+        the hostname is used.
+
+    - name: beat.hostname
+      description: >
+        The hostname as returned by the operating system on which the Beat is
+        running.
+
+server:
+  type: group
+  description: >
+    Contains server statistics. These statistics are returned from the redis command *INFO server*
+  fields:
+    - name: server
+      type: group
+      description: >
+        General information about the Redis server
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of server stats
+
+clients:
+  type: group
+  description: >
+    Contains client statistics. These statistics are returned from the redis command *INFO clients*
+  fields:
+    - name: clients
+      type: group
+      description: >
+        Client connections section
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of client stats
+
+memory:
+  type: group
+  description: >
+    Contains server statistics. These statistics are returned from the redis command *INFO memory*
+  fields:
+    - name: memory
+      type: group
+      description: >
+        Memory consumption related information
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of memory stats
+
+persistence:
+  type: group
+  description: >
+    Contains persistence statistics. These statistics are returned from the redis command *INFO persistence*
+  fields:
+    - name: persistence
+      type: group
+      description: >
+        RDB and AOF related information
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of persistence stats
+
+stats:
+  type: group
+  description: >
+    Contains redis-stats statistics. These statistics are returned from the redis command *INFO stats*
+  fields:
+    - name: stats
+      type: group
+      description: >
+        General statistics
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of redis-stats stats
+
+replication:
+  type: group
+  description: >
+    Contains replication statistics. These statistics are returned from the redis command *INFO replication*
+  fields:
+    - name: replication
+      type: group
+      description: >
+        Master/slave replication information
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of replication stats
+
+cpu:
+  type: group
+  description: >
+    Contains cpu statistics. These statistics are returned from the redis command *INFO cpu*
+  fields:
+    - name: cpu
+      type: group
+      description: >
+        CPU consumption statistics
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of cpu stats
+
+commandstats:
+  type: group
+  description: >
+    Contains command-stats statistics. These statistics are returned from the redis command *INFO commandstats*
+  fields:
+    - name: commandstats
+      type: group
+      description: >
+        Redis command statistics
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of command-stats stats
+
+cluster:
+  type: group
+  description: >
+    Contains cluster statistics. These statistics are returned from the redis command *INFO cluster*
+  fields:
+    - name: cluster
+      type: group
+      description: >
+        Redis Cluster section
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of cluster stats
+
+keyspace:
+  type: group
+  description: >
+    Contains keyspace statistics. These statistics are returned from the redis command *INFO keyspace*
+  fields:
+    - name: keyspace
+      type: group
+      description: >
+        Database related statistics
+      fields:
+        - name: stats
+          type: object
+          description: >
+            A *string => string* map of keyspace stats
