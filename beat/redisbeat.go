@@ -305,9 +305,11 @@ func (r *Redisbeat) Run(b *beat.Beat) error {
 }
 
 func (rb *Redisbeat) Cleanup(b *beat.Beat) error {
+	// I wonder if the redis pool should released here, after the main loop exists.
 	return nil
 }
 
+// Stop is triggered on exit, closing the done channel and redis pool
 func (r *Redisbeat) Stop() {
 	close(r.done)
 	r.redisPool.Close()
@@ -332,6 +334,7 @@ func (r *Redisbeat) exportStats(statType string) error {
 	return nil
 }
 
+// getInfoReply sends INFO type command and returns the response as a map
 func (r *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
 	c := r.redisPool.Get()
 	defer c.Close()
@@ -345,17 +348,19 @@ func (r *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
 	}
 }
 
+// convertReplyToMap converts a bulk string reply from Redis to a map
 func convertReplyToMap(s string) (map[string]string, error) {
 	var info map[string]string
 	info = make(map[string]string)
 
-	// Regex for INFO type
+	// Regex for INFO type property
 	infoRegex := `^\s*#\s*\w+\s*$`
 	r, err := regexp.Compile(infoRegex)
 	if err != nil {
 		return nil, errors.New("Regex failed to compile")
 	}
 
+	// http://redis.io/topics/protocol#bulk-string-reply
 	a := strings.Split(s, "\r\n")
 
 	for _, v := range a {
