@@ -1,4 +1,5 @@
 [![Build Status](https://travis-ci.org/chrsblck/redisbeat.svg?branch=master)](https://travis-ci.org/chrsblck/redisbeat)
+[![codecov.io](https://codecov.io/github/chrsblck/redisbeat/coverage.svg?branch=master)](https://codecov.io/github/chrsblck/redisbeat?branch=master)
 
 # Redisbeat
 
