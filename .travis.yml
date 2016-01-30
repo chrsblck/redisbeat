@@ -9,7 +9,7 @@ os:
   - osx
 
 install:
-  - go get github.com/elastic/beats
+  - go get github.com/elastic/beats/libbeat
   - go get github.com/garyburd/redigo/redis
   - go get github.com/stretchr/testify/assert
 
