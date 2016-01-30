@@ -22,6 +22,9 @@ GOPATH=<your go path> make
 # Test
 GOPATH=<your go path> make unit-tests
 
+# Run Test Suite
+GOPATH=<your go path> make testsuite
+
 # Run
 ./redisbeat -c redisbeat.yml
 ```
