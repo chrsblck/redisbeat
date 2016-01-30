@@ -1,0 +1,16 @@
+sudo: false
+language: go
+
+go:
+  - 1.5.3
+
+os:
+  - linux
+  - osx
+
+install:
+  - go get github.com/elastic/beats
+  - go get github.com/garyburd/redigo/redis
+  - go get github.com/stretchr/testify/assert
+
+script: make testsuite
