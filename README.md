@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/chrsblck/redisbeat.svg?branch=master)](https://travis-ci.org/chrsblck/redisbeat)
+
 # Redisbeat
 
 Redisbeat is the Beat used for Redis monitoring. It is a lightweight agent that reads status from the Redis `INFO` command periodically. 
