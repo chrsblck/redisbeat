@@ -1,0 +1,58 @@
+################### Redisbeat Test Config #########################
+
+############################# Input ############################################
+input:
+  # In seconds, defines how often to read server statistics
+  period: 5
+
+  # Host of redis server, default is localhost
+  host: "redis.testing.fake"
+
+  # Port the redis server is listening on, default is 6379
+  port: 9736
+
+  # Network type, default is tcp
+  network: "udp"
+
+  # Max connections for redis pool, default is 10
+  maxconn: 5
+
+  # Authentication config
+  auth:
+    # default is false
+    required: true
+    # default is empty string
+    required_pass: "p@ssw0rd"
+
+  # Statistics to collect (all enabled by default)
+  stats:
+    # server information
+    server: true
+
+    # clients information
+    clients: false
+
+    # memory information
+    memory: false
+
+    # persistence information
+    persistence: false
+
+    # stats information
+    stats: false
+
+    # replication information
+    replication: false
+
+    # cpu information
+    cpu: false
+
+    # commandstats information
+    commandstats: false
+
+    # cluster information
+    cluster: false
+
+    # keyspace information
+    keyspace: false
+

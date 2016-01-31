@@ -56,103 +56,103 @@ func (rb *Redisbeat) Config(b *beat.Beat) error {
 	if rb.RbConfig.Input.Period != nil {
 		rb.period = time.Duration(*rb.RbConfig.Input.Period) * time.Second
 	} else {
-		rb.period = 1 * time.Second
+		rb.period = DEFAULT_PERIOD
 	}
 
 	if rb.RbConfig.Input.Host != nil {
 		rb.host = *rb.RbConfig.Input.Host
 	} else {
-		rb.host = "localhost"
+		rb.host = DEFAULT_HOST
 	}
 
 	if rb.RbConfig.Input.Port != nil {
 		rb.port = *rb.RbConfig.Input.Port
 	} else {
-		rb.port = 6379
+		rb.port = DEFAULT_PORT
 	}
 
 	if rb.RbConfig.Input.Network != nil {
 		rb.network = *rb.RbConfig.Input.Network
 	} else {
-		rb.network = "tcp"
+		rb.network = DEFAULT_NETWORK
 	}
 
 	if rb.RbConfig.Input.MaxConn != nil {
 		rb.maxConn = *rb.RbConfig.Input.MaxConn
 	} else {
-		rb.maxConn = 10
+		rb.maxConn = DEFAULT_MAX_CONN
 	}
 
 	if rb.RbConfig.Input.Auth.Required != nil {
 		rb.auth = *rb.RbConfig.Input.Auth.Required
 	} else {
-		rb.auth = false
+		rb.auth = DEFAULT_AUTH_REQUIRED
 	}
 
 	if rb.RbConfig.Input.Auth.RequiredPass != nil {
 		rb.pass = *rb.RbConfig.Input.Auth.RequiredPass
 	} else {
-		rb.pass = ""
+		rb.pass = DEFAULT_AUTH_REQUIRED_PASS
 	}
 
 	if rb.RbConfig.Input.Stats.Server != nil {
 		rb.serverStats = *rb.RbConfig.Input.Stats.Server
 	} else {
-		rb.serverStats = true
+		rb.serverStats = DEFAULT_STATS_SERVER
 	}
 
 	if rb.RbConfig.Input.Stats.Clients != nil {
 		rb.clientsStats = *rb.RbConfig.Input.Stats.Clients
 	} else {
-		rb.clientsStats = true
+		rb.clientsStats = DEFAULT_STATS_CLIENT
 	}
 
 	if rb.RbConfig.Input.Stats.Memory != nil {
 		rb.memoryStats = *rb.RbConfig.Input.Stats.Memory
 	} else {
-		rb.memoryStats = true
+		rb.memoryStats = DEFAULT_STATS_MEMORY
 	}
 
 	if rb.RbConfig.Input.Stats.Persistence != nil {
 		rb.persistenceStats = *rb.RbConfig.Input.Stats.Persistence
 	} else {
-		rb.persistenceStats = true
+		rb.persistenceStats = DEFAULT_STATS_PERSISTENCE
 	}
 
 	if rb.RbConfig.Input.Stats.Stats != nil {
 		rb.statsStats = *rb.RbConfig.Input.Stats.Stats
 	} else {
-		rb.statsStats = true
+		rb.statsStats = DEFAULT_STATS_STATS
 	}
 
 	if rb.RbConfig.Input.Stats.Replication != nil {
 		rb.replicationStats = *rb.RbConfig.Input.Stats.Replication
 	} else {
-		rb.replicationStats = true
+		rb.replicationStats = DEFAULT_STATS_REPLICATION
 	}
 
 	if rb.RbConfig.Input.Stats.Cpu != nil {
 		rb.cpuStats = *rb.RbConfig.Input.Stats.Cpu
 	} else {
-		rb.cpuStats = true
+		rb.cpuStats = DEFAULT_STATS_CPU
 	}
 
 	if rb.RbConfig.Input.Stats.Commandstats != nil {
 		rb.commandStats = *rb.RbConfig.Input.Stats.Commandstats
 	} else {
-		rb.commandStats = true
+		rb.commandStats = DEFAULT_STATS_COMMAND
 	}
 
 	if rb.RbConfig.Input.Stats.Cluster != nil {
 		rb.clusterStats = *rb.RbConfig.Input.Stats.Cluster
 	} else {
-		rb.clusterStats = true
+		rb.clusterStats = DEFAULT_STATS_CLUSTER
 	}
 
 	if rb.RbConfig.Input.Stats.Keyspace != nil {
 		rb.keyspaceStats = *rb.RbConfig.Input.Stats.Keyspace
 	} else {
-		rb.keyspaceStats = true
+		rb.keyspaceStats = DEFAULT_STATS_KEYSPACE
 	}
 
 	logp.Debug("redisbeat", "Init redisbeat")

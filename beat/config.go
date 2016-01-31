@@ -1,5 +1,27 @@
 package beat
 
+import "time"
+
+const (
+	DEFAULT_PERIOD             time.Duration = 10 * time.Second
+	DEFAULT_HOST               string        = "localhost"
+	DEFAULT_PORT               int           = 6379
+	DEFAULT_NETWORK            string        = "tcp"
+	DEFAULT_MAX_CONN           int           = 10
+	DEFAULT_AUTH_REQUIRED      bool          = false
+	DEFAULT_AUTH_REQUIRED_PASS string        = ""
+	DEFAULT_STATS_SERVER       bool          = true
+	DEFAULT_STATS_CLIENT       bool          = true
+	DEFAULT_STATS_MEMORY       bool          = true
+	DEFAULT_STATS_PERSISTENCE  bool          = true
+	DEFAULT_STATS_STATS        bool          = true
+	DEFAULT_STATS_REPLICATION  bool          = true
+	DEFAULT_STATS_CPU          bool          = true
+	DEFAULT_STATS_COMMAND      bool          = true
+	DEFAULT_STATS_CLUSTER      bool          = true
+	DEFAULT_STATS_KEYSPACE     bool          = true
+)
+
 type RedisConfig struct {
 	Period  *int64
 	Host    *string
