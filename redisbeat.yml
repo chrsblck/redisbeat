@@ -27,34 +27,38 @@ input:
   # Statistics to collect (all enabled by default)
   stats:
     # server information
-    #server: true
+    server: false
 
     # clients information
-    #clients: true
+    clients: false
 
     # memory information
-    #memory: true
+    memory: false
 
     # persistence information
-    #persistence: true
+    persistence: false
 
     # stats information
-    #stats: true
+    stats: false
 
     # replication information
-    #replication: true
+    replication: false
     
     # cpu information
-    #cpu: true
+    cpu: false
 
     # commandstats information
-    #commandstats: true
+    commandstats: false
 
     # cluster information
-    #cluster: true
+    cluster: false
 
     # keyspace information
-    #keyspace: true
+    keyspace: false
+    # Key Pattern Information
+    keypattern:
+     - "us*"
+     - "gr*"
 ###############################################################################
 ############################# Libbeat Config ##################################
 # Base config file used by all other beats for using libbeat features
