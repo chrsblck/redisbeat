@@ -177,7 +177,7 @@ func (rb *Redisbeat) Config(b *beat.Beat) error {
 }
 
 func (rb *Redisbeat) Setup(b *beat.Beat) error {
-	rb.events = b.Events
+	rb.events = b.Publisher.Connect()
 	rb.done = make(chan struct{})
 
 	// Set up redis pool
