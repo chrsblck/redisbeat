@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/elastic/beats/libbeat/beat"
-	"github.com/elastic/beats/libbeat/cfgfile"
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
@@ -43,16 +42,17 @@ type Redisbeat struct {
 
 func New(b *beat.Beat, cfg *common.Config) (be beat.Beater, err error) {
 	rb := &Redisbeat{}
-	if err = rb.config(b); err != nil {
+	if err = rb.config(b, cfg); err != nil {
 		logp.Err("Config error")
 	}
 
 	return rb, err
 }
 
-func (rb *Redisbeat) config(b *beat.Beat) error {
+func (rb *Redisbeat) config(b *beat.Beat, cfg *common.Config) error {
 
-	err := cfgfile.Read(&rb.RbConfig, "")
+	err := cfg.Unpack(&rb.RbConfig)
+	//err := cfgfile.Read(&rb.RbConfig, "")
 	if err != nil {
 		logp.Err("Error reading configuration file: %v", err)
 		return err

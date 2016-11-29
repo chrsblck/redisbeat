@@ -1,22 +1,26 @@
 package beat
 
 import (
-	"os"
 	"testing"
 	"time"
 
 	beat "github.com/elastic/beats/libbeat/beat"
-	cfg "github.com/elastic/beats/libbeat/cfgfile"
+	"github.com/elastic/beats/libbeat/common"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestDefaultConfig(t *testing.T) {
 	// modify cfgfile's default location
-	os.Args = []string{"../redisbeat.yaml"}
-	cfg.ChangeDefaultCfgfileFlag("redisbeat")
+	//os.Args = []string{"../redisbeat.yaml"}
+	//cfg.ChangeDefaultCfgfileFlag("redisbeat")
+	conf, err := common.LoadFile("../redisbeat.yml")
+	if err != nil {
+		t.Errorf("Load file failed %v", err)
+	}
 
-	rb := New()
-	err := rb.Config(&beat.Beat{})
+	b := &beat.Beat{}
+	rrb, err := New(b, conf)
+	rb, _ := rrb.(*Redisbeat)
 	assert.Nil(t, err)
 
 	assert.Equal(t, DEFAULT_PERIOD, rb.period, "Default time period should be %v", DEFAULT_PERIOD)
@@ -40,11 +44,17 @@ func TestDefaultConfig(t *testing.T) {
 
 func TestModifiedConfig(t *testing.T) {
 	// modify cfgfile's default location
-	os.Args = []string{"../tests/redisbeat.yml"}
-	cfg.ChangeDefaultCfgfileFlag("redisbeat")
+	//os.Args = []string{"../tests/redisbeat.yml"}
+	//cfg.ChangeDefaultCfgfileFlag("redisbeat")
 
-	rb := New()
-	err := rb.Config(&beat.Beat{})
+	conf, err := common.LoadFile("../tests/redisbeat.yml")
+	if err != nil {
+		t.Fatalf("Load file failed %v", err)
+	}
+
+	b := &beat.Beat{}
+	rrb, err := New(b, conf)
+	rb, _ := rrb.(*Redisbeat)
 	assert.Nil(t, err)
 
 	expectedTime := 5 * time.Second
