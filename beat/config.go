@@ -22,6 +22,8 @@ const (
 	DEFAULT_STATS_KEYSPACE     bool          = true
 )
 
+var DEFAULT_KEY_PATTERN = []string {"admin*"}
+
 type RedisConfig struct {
 	Period  *int64
 	Host    *string
@@ -43,6 +45,8 @@ type RedisConfig struct {
 		Commandstats *bool `yaml:"commandstats"`
 		Cluster      *bool `yaml:"cluster"`
 		Keyspace     *bool `yaml:"keyspace"`
+		KeyPattern   *[]string `yaml:"keypattern"`
+
 	}
 }
 

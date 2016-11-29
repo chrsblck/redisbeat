@@ -2,8 +2,8 @@ package main
 
 import (
 	redisbeat "github.com/chrsblck/redisbeat/beat"
-
 	"github.com/elastic/beats/libbeat/beat"
+
 )
 
 var Name = "redisbeat"

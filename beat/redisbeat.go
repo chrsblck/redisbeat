@@ -13,6 +13,7 @@ import (
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
 	"github.com/garyburd/redigo/redis"
+	"fmt"
 )
 
 type Redisbeat struct {
@@ -36,6 +37,7 @@ type Redisbeat struct {
 	commandStats     bool
 	clusterStats     bool
 	keyspaceStats    bool
+	keyPattern	 []string
 
 	redisPool *redis.Pool
 	done      chan struct{}
@@ -154,6 +156,11 @@ func (rb *Redisbeat) Config(b *beat.Beat) error {
 	} else {
 		rb.keyspaceStats = DEFAULT_STATS_KEYSPACE
 	}
+	if len(*rb.RbConfig.Input.Stats.KeyPattern) != 0 {
+		rb.keyPattern = *rb.RbConfig.Input.Stats.KeyPattern
+	}else {
+		rb.keyPattern = DEFAULT_KEY_PATTERN
+	}
 
 	logp.Debug("redisbeat", "Init redisbeat")
 	logp.Debug("redisbeat", "Period %v\n", rb.period)
@@ -172,7 +179,7 @@ func (rb *Redisbeat) Config(b *beat.Beat) error {
 	logp.Debug("redisbeat", "Command statistics %t\n", rb.commandStats)
 	logp.Debug("redisbeat", "Cluster statistics %t\n", rb.clusterStats)
 	logp.Debug("redisbeat", "Keyspace statistics %t\n", rb.keyspaceStats)
-
+	logp.Debug("redisbeat", "KeyPatterns to be fetched %t\n", rb.keyPattern)
 	return nil
 }
 
@@ -222,8 +229,9 @@ func (r *Redisbeat) Run(b *beat.Beat) error {
 		}
 
 		timerStart := time.Now()
-
+		r.exportKeys(r.keyPattern)
 		if r.serverStats {
+
 			err = r.exportStats("server")
 			if err != nil {
 				logp.Err("Error reading server stats: %v", err)
@@ -345,6 +353,54 @@ func (r *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
 	} else {
 		s := string(reply[:])
 		return convertReplyToMap(s)
+	}
+}
+
+func (r *Redisbeat) exportKeys(pattern []string) error {
+	event := common.MapStr{
+                "@timestamp": common.Time(time.Now()),
+                "type":      "keys",
+        }
+	for _,patt := range pattern{
+		res,err := r.getKeys(patt)
+		if err !=nil {
+			return nil
+		}
+		for k, v := range res {
+		    event[k] = v
+		}
+	}
+        r.events.PublishEvent(event)
+        return nil
+}
+
+// getKeys returns values for keys patterns
+func (r *Redisbeat) getKeys(pattern string) (map[string]string, error) {
+	c := r.redisPool.Get()
+	defer c.Close()
+	keys, err := redis.Strings(c.Do("keys", pattern))
+	if err != nil {
+		fmt.Println("Error while getting keys")
+		return nil, err
+	} else {
+		var args []interface{}
+		for _, k := range keys {
+		    args = append(args, k)
+		}
+		fmt.Println(args)
+		values, err := redis.Strings(c.Do("MGET", args...))
+		if err != nil{
+			fmt.Println("Error while getting values")
+			logp.Debug("Error while getting values",err.Error())
+			return nil, err
+		}
+		strMap := map[string]string {}
+		fmt.Println("printing values" ,values)
+		for i,v := range values {
+			strMap[keys[i]] = v
+			fmt.Println(keys[i],v)
+		}
+		return strMap, nil
 	}
 }
 
