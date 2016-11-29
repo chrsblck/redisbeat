@@ -10,5 +10,5 @@ var Name = "redisbeat"
 var Version = "0.0.1"
 
 func main() {
-	beat.Run(Name, Version, redisbeat.New())
+	beat.Run(Name, Version, redisbeat.New)
 }
