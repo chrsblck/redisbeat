@@ -177,6 +177,7 @@ func (rb *Redisbeat) config(b *beat.Beat) error {
 	logp.Debug("redisbeat", "Command statistics %t", rb.commandStats)
 	logp.Debug("redisbeat", "Cluster statistics %t", rb.clusterStats)
 	logp.Debug("redisbeat", "Keyspace statistics %t", rb.keyspaceStats)
+	logp.Debug("redisbeat", "RequiredPass %v", rb.pass)
 
 	return nil
 }
@@ -345,6 +346,17 @@ func (r *Redisbeat) exportStats(statType string) error {
 func (r *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
 	c := r.redisPool.Get()
 	defer c.Close()
+
+	if r.auth {
+		authed, err := c.Do("AUTH", r.pass)
+		if err != nil {
+			logp.Err("auth error: %v", r.pass)
+			return nil, err
+		} else {
+			logp.Debug("redisbeat", "AUTH %v", authed)
+		}
+	}
+
 	reply, err := redis.Bytes(c.Do("INFO", infoType))
 
 	if err != nil {
