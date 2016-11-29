@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/elastic/beats/libbeat/beat"
-	"github.com/elastic/beats/libbeat/cfgfile"
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
@@ -41,13 +40,18 @@ type Redisbeat struct {
 	done      chan struct{}
 }
 
-func New() *Redisbeat {
-	return &Redisbeat{}
+func New(b *beat.Beat, cfg *common.Config) (be beat.Beater, err error) {
+	rb := &Redisbeat{}
+	if err = rb.config(b, cfg); err != nil {
+		logp.Err("Config error")
+	}
+
+	return rb, err
 }
 
-func (rb *Redisbeat) Config(b *beat.Beat) error {
+func (rb *Redisbeat) config(b *beat.Beat, cfg *common.Config) error {
 
-	err := cfgfile.Read(&rb.RbConfig, "")
+	err := cfg.Unpack(&rb.RbConfig)
 	if err != nil {
 		logp.Err("Error reading configuration file: %v", err)
 		return err
@@ -156,27 +160,27 @@ func (rb *Redisbeat) Config(b *beat.Beat) error {
 	}
 
 	logp.Debug("redisbeat", "Init redisbeat")
-	logp.Debug("redisbeat", "Period %v\n", rb.period)
-	logp.Debug("redisbeat", "Host %v\n", rb.host)
-	logp.Debug("redisbeat", "Port %v\n", rb.port)
-	logp.Debug("redisbeat", "Network %v\n", rb.network)
-	logp.Debug("redisbeat", "Max Connections %v\n", rb.maxConn)
-	logp.Debug("redisbeat", "Auth %t\n", rb.auth)
-	logp.Debug("redisbeat", "Server statistics %t\n", rb.serverStats)
-	logp.Debug("redisbeat", "Client statistics %t\n", rb.clientsStats)
-	logp.Debug("redisbeat", "Memory statistics %t\n", rb.memoryStats)
-	logp.Debug("redisbeat", "Persistence statistics %t\n", rb.persistenceStats)
-	logp.Debug("redisbeat", "Stats statistics %t\n", rb.statsStats)
-	logp.Debug("redisbeat", "Replication statistics %t\n", rb.replicationStats)
-	logp.Debug("redisbeat", "Cpu statistics %t\n", rb.cpuStats)
-	logp.Debug("redisbeat", "Command statistics %t\n", rb.commandStats)
-	logp.Debug("redisbeat", "Cluster statistics %t\n", rb.clusterStats)
-	logp.Debug("redisbeat", "Keyspace statistics %t\n", rb.keyspaceStats)
+	logp.Debug("redisbeat", "Period %v", rb.period)
+	logp.Debug("redisbeat", "Host %v", rb.host)
+	logp.Debug("redisbeat", "Port %v", rb.port)
+	logp.Debug("redisbeat", "Network %v", rb.network)
+	logp.Debug("redisbeat", "Max Connections %v", rb.maxConn)
+	logp.Debug("redisbeat", "Auth %t", rb.auth)
+	logp.Debug("redisbeat", "Server statistics %t", rb.serverStats)
+	logp.Debug("redisbeat", "Client statistics %t", rb.clientsStats)
+	logp.Debug("redisbeat", "Memory statistics %t", rb.memoryStats)
+	logp.Debug("redisbeat", "Persistence statistics %t", rb.persistenceStats)
+	logp.Debug("redisbeat", "Stats statistics %t", rb.statsStats)
+	logp.Debug("redisbeat", "Replication statistics %t", rb.replicationStats)
+	logp.Debug("redisbeat", "Cpu statistics %t", rb.cpuStats)
+	logp.Debug("redisbeat", "Command statistics %t", rb.commandStats)
+	logp.Debug("redisbeat", "Cluster statistics %t", rb.clusterStats)
+	logp.Debug("redisbeat", "Keyspace statistics %t", rb.keyspaceStats)
 
 	return nil
 }
 
-func (rb *Redisbeat) Setup(b *beat.Beat) error {
+func (rb *Redisbeat) setup(b *beat.Beat) error {
 	rb.events = b.Publisher.Connect()
 	rb.done = make(chan struct{})
 
@@ -210,6 +214,8 @@ func (rb *Redisbeat) Setup(b *beat.Beat) error {
 
 func (r *Redisbeat) Run(b *beat.Beat) error {
 	var err error
+
+	r.setup(b)
 
 	ticker := time.NewTicker(r.period)
 	defer ticker.Stop()
@@ -338,6 +344,17 @@ func (r *Redisbeat) exportStats(statType string) error {
 func (r *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
 	c := r.redisPool.Get()
 	defer c.Close()
+
+	if r.auth {
+		authed, err := c.Do("AUTH", r.pass)
+		if err != nil {
+			logp.Err("auth error: %v", r.pass)
+			return nil, err
+		} else {
+			logp.Debug("redisbeat", "AUTH %v", authed)
+		}
+	}
+
 	reply, err := redis.Bytes(c.Do("INFO", infoType))
 
 	if err != nil {

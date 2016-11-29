@@ -30,7 +30,7 @@ type RedisConfig struct {
 	MaxConn *int
 	Auth    struct {
 		Required     *bool   `yaml:"required"`
-		RequiredPass *string `yaml:"required_pass"`
+		RequiredPass *string `yaml:"requiredpass"`
 	}
 	Stats struct {
 		Server       *bool `yaml:"server"`

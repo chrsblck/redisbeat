@@ -22,7 +22,7 @@ input:
     # default is false
     required: true
     # default is empty string
-    required_pass: "p@ssw0rd"
+    requiredpass: "p@ssw0rd"
 
   # Statistics to collect (all enabled by default)
   stats:
