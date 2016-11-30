@@ -6,7 +6,7 @@ input:
   #period: 10
 
   # Host of redis server, default is localhost
-  host: "localhost"
+  #host: "localhost"
 
   # Port the redis server is listening on, default is 6379
   #port: 6379
@@ -20,9 +20,9 @@ input:
   # Authentication config
   auth:
     # default is false
-    required: false
+    #required: true
     # default is empty string
-    requiredpass: ""
+    #required_pass: "p@ssw0rd"
 
   # Statistics to collect (all enabled by default)
   stats:
@@ -288,6 +288,6 @@ logging:
 
   # Sets log level. The default log level is error.
   # Available log levels are: critical, error, warning, info, debug
-  level: debug
+  #level: error
 
 

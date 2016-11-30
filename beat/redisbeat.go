@@ -52,7 +52,6 @@ func New(b *beat.Beat, cfg *common.Config) (be beat.Beater, err error) {
 func (rb *Redisbeat) config(b *beat.Beat, cfg *common.Config) error {
 
 	err := cfg.Unpack(&rb.RbConfig)
-	//err := cfgfile.Read(&rb.RbConfig, "")
 	if err != nil {
 		logp.Err("Error reading configuration file: %v", err)
 		return err
