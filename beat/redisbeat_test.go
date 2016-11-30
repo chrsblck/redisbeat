@@ -10,9 +10,6 @@ import (
 )
 
 func TestDefaultConfig(t *testing.T) {
-	// modify cfgfile's default location
-	//os.Args = []string{"../redisbeat.yaml"}
-	//cfg.ChangeDefaultCfgfileFlag("redisbeat")
 	conf, err := common.LoadFile("../redisbeat.yml")
 	if err != nil {
 		t.Errorf("Load file failed %v", err)
@@ -43,10 +40,6 @@ func TestDefaultConfig(t *testing.T) {
 }
 
 func TestModifiedConfig(t *testing.T) {
-	// modify cfgfile's default location
-	//os.Args = []string{"../tests/redisbeat.yml"}
-	//cfg.ChangeDefaultCfgfileFlag("redisbeat")
-
 	conf, err := common.LoadFile("../tests/redisbeat.yml")
 	if err != nil {
 		t.Fatalf("Load file failed %v", err)

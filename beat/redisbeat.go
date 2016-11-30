@@ -177,7 +177,6 @@ func (rb *Redisbeat) config(b *beat.Beat, cfg *common.Config) error {
 	logp.Debug("redisbeat", "Command statistics %t", rb.commandStats)
 	logp.Debug("redisbeat", "Cluster statistics %t", rb.clusterStats)
 	logp.Debug("redisbeat", "Keyspace statistics %t", rb.keyspaceStats)
-	logp.Debug("redisbeat", "RequiredPass %v", rb.pass)
 
 	return nil
 }
