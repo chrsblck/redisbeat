@@ -2,6 +2,7 @@ package beat
 
 import (
 	"errors"
+	"fmt"
 	"regexp"
 	"strconv"
 	"strings"
@@ -12,172 +13,50 @@ import (
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
 	"github.com/garyburd/redigo/redis"
+
+	"github.com/chrsblck/redisbeat/config"
 )
 
 type Redisbeat struct {
-	period   time.Duration
-	host     string
-	port     int
-	network  string
-	maxConn  int
-	auth     bool
-	pass     string
-	RbConfig ConfigSettings
-	events   publisher.Client
-
-	serverStats      bool
-	clientsStats     bool
-	memoryStats      bool
-	persistenceStats bool
-	statsStats       bool
-	replicationStats bool
-	cpuStats         bool
-	commandStats     bool
-	clusterStats     bool
-	keyspaceStats    bool
+	period time.Duration
+	config config.Config
+	events publisher.Client
 
 	redisPool *redis.Pool
 	done      chan struct{}
 }
 
-func New(b *beat.Beat, cfg *common.Config) (be beat.Beater, err error) {
-	rb := &Redisbeat{}
-	if err = rb.config(b, cfg); err != nil {
-		logp.Err("Config error")
-	}
-
-	return rb, err
-}
-
-func (rb *Redisbeat) config(b *beat.Beat, cfg *common.Config) error {
-
-	err := cfg.Unpack(&rb.RbConfig)
+func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
+	config := config.DefaultConfig
+	err := cfg.Unpack(&config)
 	if err != nil {
-		logp.Err("Error reading configuration file: %v", err)
-		return err
+		return nil, fmt.Errorf("Error reading configuration file: %v", err)
 	}
 
-	if rb.RbConfig.Input.Period != nil {
-		rb.period = time.Duration(*rb.RbConfig.Input.Period) * time.Second
-	} else {
-		rb.period = DEFAULT_PERIOD
+	rb := &Redisbeat{
+		done:   make(chan struct{}),
+		config: config,
 	}
 
-	if rb.RbConfig.Input.Host != nil {
-		rb.host = *rb.RbConfig.Input.Host
-	} else {
-		rb.host = DEFAULT_HOST
-	}
+	logp.Debug("redisbeat", "Redisbeat configuration:")
+	logp.Debug("redisbeat", "Period %v", rb.config.Period)
+	logp.Debug("redisbeat", "Host %v", rb.config.Host)
+	logp.Debug("redisbeat", "Port %v", rb.config.Port)
+	logp.Debug("redisbeat", "Network %v", rb.config.Network)
+	logp.Debug("redisbeat", "Max Connections %v", rb.config.MaxConn)
+	logp.Debug("redisbeat", "Auth %t", rb.config.Auth.Required)
+	logp.Debug("redisbeat", "Server statistics %t", rb.config.Stats.Server)
+	logp.Debug("redisbeat", "Client statistics %t", rb.config.Stats.Clients)
+	logp.Debug("redisbeat", "Memory statistics %t", rb.config.Stats.Memory)
+	logp.Debug("redisbeat", "Persistence statistics %t", rb.config.Stats.Persistence)
+	logp.Debug("redisbeat", "Stats statistics %t", rb.config.Stats.Stats)
+	logp.Debug("redisbeat", "Replication statistics %t", rb.config.Stats.Replication)
+	logp.Debug("redisbeat", "Cpu statistics %t", rb.config.Stats.Cpu)
+	logp.Debug("redisbeat", "Command statistics %t", rb.config.Stats.Commandstats)
+	logp.Debug("redisbeat", "Cluster statistics %t", rb.config.Stats.Cluster)
+	logp.Debug("redisbeat", "Keyspace statistics %t", rb.config.Stats.Keyspace)
 
-	if rb.RbConfig.Input.Port != nil {
-		rb.port = *rb.RbConfig.Input.Port
-	} else {
-		rb.port = DEFAULT_PORT
-	}
-
-	if rb.RbConfig.Input.Network != nil {
-		rb.network = *rb.RbConfig.Input.Network
-	} else {
-		rb.network = DEFAULT_NETWORK
-	}
-
-	if rb.RbConfig.Input.MaxConn != nil {
-		rb.maxConn = *rb.RbConfig.Input.MaxConn
-	} else {
-		rb.maxConn = DEFAULT_MAX_CONN
-	}
-
-	if rb.RbConfig.Input.Auth.Required != nil {
-		rb.auth = *rb.RbConfig.Input.Auth.Required
-	} else {
-		rb.auth = DEFAULT_AUTH_REQUIRED
-	}
-
-	if rb.RbConfig.Input.Auth.RequiredPass != nil {
-		rb.pass = *rb.RbConfig.Input.Auth.RequiredPass
-	} else {
-		rb.pass = DEFAULT_AUTH_REQUIRED_PASS
-	}
-
-	if rb.RbConfig.Input.Stats.Server != nil {
-		rb.serverStats = *rb.RbConfig.Input.Stats.Server
-	} else {
-		rb.serverStats = DEFAULT_STATS_SERVER
-	}
-
-	if rb.RbConfig.Input.Stats.Clients != nil {
-		rb.clientsStats = *rb.RbConfig.Input.Stats.Clients
-	} else {
-		rb.clientsStats = DEFAULT_STATS_CLIENT
-	}
-
-	if rb.RbConfig.Input.Stats.Memory != nil {
-		rb.memoryStats = *rb.RbConfig.Input.Stats.Memory
-	} else {
-		rb.memoryStats = DEFAULT_STATS_MEMORY
-	}
-
-	if rb.RbConfig.Input.Stats.Persistence != nil {
-		rb.persistenceStats = *rb.RbConfig.Input.Stats.Persistence
-	} else {
-		rb.persistenceStats = DEFAULT_STATS_PERSISTENCE
-	}
-
-	if rb.RbConfig.Input.Stats.Stats != nil {
-		rb.statsStats = *rb.RbConfig.Input.Stats.Stats
-	} else {
-		rb.statsStats = DEFAULT_STATS_STATS
-	}
-
-	if rb.RbConfig.Input.Stats.Replication != nil {
-		rb.replicationStats = *rb.RbConfig.Input.Stats.Replication
-	} else {
-		rb.replicationStats = DEFAULT_STATS_REPLICATION
-	}
-
-	if rb.RbConfig.Input.Stats.Cpu != nil {
-		rb.cpuStats = *rb.RbConfig.Input.Stats.Cpu
-	} else {
-		rb.cpuStats = DEFAULT_STATS_CPU
-	}
-
-	if rb.RbConfig.Input.Stats.Commandstats != nil {
-		rb.commandStats = *rb.RbConfig.Input.Stats.Commandstats
-	} else {
-		rb.commandStats = DEFAULT_STATS_COMMAND
-	}
-
-	if rb.RbConfig.Input.Stats.Cluster != nil {
-		rb.clusterStats = *rb.RbConfig.Input.Stats.Cluster
-	} else {
-		rb.clusterStats = DEFAULT_STATS_CLUSTER
-	}
-
-	if rb.RbConfig.Input.Stats.Keyspace != nil {
-		rb.keyspaceStats = *rb.RbConfig.Input.Stats.Keyspace
-	} else {
-		rb.keyspaceStats = DEFAULT_STATS_KEYSPACE
-	}
-
-	logp.Debug("redisbeat", "Init redisbeat")
-	logp.Debug("redisbeat", "Period %v", rb.period)
-	logp.Debug("redisbeat", "Host %v", rb.host)
-	logp.Debug("redisbeat", "Port %v", rb.port)
-	logp.Debug("redisbeat", "Network %v", rb.network)
-	logp.Debug("redisbeat", "Max Connections %v", rb.maxConn)
-	logp.Debug("redisbeat", "Auth %t", rb.auth)
-	logp.Debug("redisbeat", "Server statistics %t", rb.serverStats)
-	logp.Debug("redisbeat", "Client statistics %t", rb.clientsStats)
-	logp.Debug("redisbeat", "Memory statistics %t", rb.memoryStats)
-	logp.Debug("redisbeat", "Persistence statistics %t", rb.persistenceStats)
-	logp.Debug("redisbeat", "Stats statistics %t", rb.statsStats)
-	logp.Debug("redisbeat", "Replication statistics %t", rb.replicationStats)
-	logp.Debug("redisbeat", "Cpu statistics %t", rb.cpuStats)
-	logp.Debug("redisbeat", "Command statistics %t", rb.commandStats)
-	logp.Debug("redisbeat", "Cluster statistics %t", rb.clusterStats)
-	logp.Debug("redisbeat", "Keyspace statistics %t", rb.keyspaceStats)
-
-	return nil
+	return rb, nil
 }
 
 func (rb *Redisbeat) setup(b *beat.Beat) error {
@@ -186,22 +65,22 @@ func (rb *Redisbeat) setup(b *beat.Beat) error {
 
 	// Set up redis pool
 	redisPool := redis.NewPool(func() (redis.Conn, error) {
-		c, err := redis.Dial(rb.network, rb.host+":"+strconv.Itoa(rb.port))
+		c, err := redis.Dial(rb.config.Network, rb.config.Host+":"+strconv.Itoa(rb.config.Port))
 
 		if err != nil {
 			return nil, err
 		}
 
 		return c, err
-	}, rb.maxConn)
+	}, rb.config.MaxConn)
 
 	rb.redisPool = redisPool
 
-	if rb.auth {
+	if rb.config.Auth.Required {
 		c := rb.redisPool.Get()
 		defer c.Close()
 
-		authed, err := c.Do("AUTH", rb.pass)
+		authed, err := c.Do("AUTH", rb.config.Auth.RequiredPass)
 		if err != nil {
 			return err
 		} else {
@@ -217,7 +96,7 @@ func (r *Redisbeat) Run(b *beat.Beat) error {
 
 	r.setup(b)
 
-	ticker := time.NewTicker(r.period)
+	ticker := time.NewTicker(r.config.Period)
 	defer ticker.Stop()
 
 	for {
@@ -229,70 +108,70 @@ func (r *Redisbeat) Run(b *beat.Beat) error {
 
 		timerStart := time.Now()
 
-		if r.serverStats {
+		if r.config.Stats.Server {
 			err = r.exportStats("server")
 			if err != nil {
 				logp.Err("Error reading server stats: %v", err)
 				break
 			}
 		}
-		if r.clientsStats {
+		if r.config.Stats.Clients {
 			err = r.exportStats("clients")
 			if err != nil {
 				logp.Err("Error reading clients stats: %v", err)
 				break
 			}
 		}
-		if r.memoryStats {
+		if r.config.Stats.Memory {
 			err = r.exportStats("memory")
 			if err != nil {
 				logp.Err("Error reading memory stats: %v", err)
 				break
 			}
 		}
-		if r.persistenceStats {
+		if r.config.Stats.Persistence {
 			err = r.exportStats("persistence")
 			if err != nil {
 				logp.Err("Error reading persistence stats: %v", err)
 				break
 			}
 		}
-		if r.statsStats {
+		if r.config.Stats.Stats {
 			err = r.exportStats("stats")
 			if err != nil {
 				logp.Err("Error reading stats stats: %v", err)
 				break
 			}
 		}
-		if r.replicationStats {
+		if r.config.Stats.Replication {
 			err = r.exportStats("replication")
 			if err != nil {
 				logp.Err("Error reading replication stats: %v", err)
 				break
 			}
 		}
-		if r.cpuStats {
+		if r.config.Stats.Cpu {
 			err = r.exportStats("cpu")
 			if err != nil {
 				logp.Err("Error reading cpu stats: %v", err)
 				break
 			}
 		}
-		if r.commandStats {
+		if r.config.Stats.Commandstats {
 			err = r.exportStats("commandstats")
 			if err != nil {
 				logp.Err("Error reading commandstats: %v", err)
 				break
 			}
 		}
-		if r.clusterStats {
+		if r.config.Stats.Cluster {
 			err = r.exportStats("cluster")
 			if err != nil {
 				logp.Err("Error reading cluster stats: %v", err)
 				break
 			}
 		}
-		if r.keyspaceStats {
+		if r.config.Stats.Keyspace {
 			err = r.exportStats("keyspace")
 			if err != nil {
 				logp.Err("Error reading keypsace stats: %v", err)
@@ -345,10 +224,9 @@ func (r *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
 	c := r.redisPool.Get()
 	defer c.Close()
 
-	if r.auth {
-		authed, err := c.Do("AUTH", r.pass)
+	if r.config.Auth.Required {
+		authed, err := c.Do("AUTH", r.config.Auth.RequiredPass)
 		if err != nil {
-			logp.Err("auth error: %v", r.pass)
 			return nil, err
 		} else {
 			logp.Debug("redisbeat", "AUTH %v", authed)

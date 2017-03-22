@@ -1,7 +1,7 @@
 ################### Redisbeat Configuration Example #########################
 
 ############################# Input ############################################
-input:
+redisbeat:
   # In seconds, defines how often to read server statistics
   #period: 10
 
