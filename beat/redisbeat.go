@@ -8,13 +8,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/chrsblck/redisbeat/config"
 	"github.com/elastic/beats/libbeat/beat"
 	"github.com/elastic/beats/libbeat/common"
 	"github.com/elastic/beats/libbeat/logp"
 	"github.com/elastic/beats/libbeat/publisher"
 	"github.com/garyburd/redigo/redis"
-
-	"github.com/chrsblck/redisbeat/config"
 )
 
 type Redisbeat struct {
@@ -27,15 +26,15 @@ type Redisbeat struct {
 }
 
 func New(b *beat.Beat, cfg *common.Config) (beat.Beater, error) {
-	config := config.DefaultConfig
-	err := cfg.Unpack(&config)
+	defaultConfig := config.DefaultConfig
+	err := cfg.Unpack(&defaultConfig)
 	if err != nil {
 		return nil, fmt.Errorf("Error reading configuration file: %v", err)
 	}
 
 	rb := &Redisbeat{
 		done:   make(chan struct{}),
-		config: config,
+		config: defaultConfig,
 	}
 
 	logp.Debug("redisbeat", "Redisbeat configuration:")
