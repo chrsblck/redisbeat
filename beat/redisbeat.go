@@ -90,88 +90,88 @@ func (rb *Redisbeat) setup(b *beat.Beat) error {
 	return nil
 }
 
-func (r *Redisbeat) Run(b *beat.Beat) error {
+func (rb *Redisbeat) Run(b *beat.Beat) error {
 	var err error
 
-	r.setup(b)
+	rb.setup(b)
 
-	ticker := time.NewTicker(r.config.Period)
+	ticker := time.NewTicker(rb.config.Period)
 	defer ticker.Stop()
 
 	for {
 		select {
-		case <-r.done:
+		case <-rb.done:
 			return nil
 		case <-ticker.C:
 		}
 
 		timerStart := time.Now()
 
-		if r.config.Stats.Server {
-			err = r.exportStats("server")
+		if rb.config.Stats.Server {
+			err = rb.exportStats("server")
 			if err != nil {
 				logp.Err("Error reading server stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Clients {
-			err = r.exportStats("clients")
+		if rb.config.Stats.Clients {
+			err = rb.exportStats("clients")
 			if err != nil {
 				logp.Err("Error reading clients stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Memory {
-			err = r.exportStats("memory")
+		if rb.config.Stats.Memory {
+			err = rb.exportStats("memory")
 			if err != nil {
 				logp.Err("Error reading memory stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Persistence {
-			err = r.exportStats("persistence")
+		if rb.config.Stats.Persistence {
+			err = rb.exportStats("persistence")
 			if err != nil {
 				logp.Err("Error reading persistence stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Stats {
-			err = r.exportStats("stats")
+		if rb.config.Stats.Stats {
+			err = rb.exportStats("stats")
 			if err != nil {
 				logp.Err("Error reading stats stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Replication {
-			err = r.exportStats("replication")
+		if rb.config.Stats.Replication {
+			err = rb.exportStats("replication")
 			if err != nil {
 				logp.Err("Error reading replication stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Cpu {
-			err = r.exportStats("cpu")
+		if rb.config.Stats.Cpu {
+			err = rb.exportStats("cpu")
 			if err != nil {
 				logp.Err("Error reading cpu stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Commandstats {
-			err = r.exportStats("commandstats")
+		if rb.config.Stats.Commandstats {
+			err = rb.exportStats("commandstats")
 			if err != nil {
 				logp.Err("Error reading commandstats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Cluster {
-			err = r.exportStats("cluster")
+		if rb.config.Stats.Cluster {
+			err = rb.exportStats("cluster")
 			if err != nil {
 				logp.Err("Error reading cluster stats: %v", err)
 				break
 			}
 		}
-		if r.config.Stats.Keyspace {
-			err = r.exportStats("keyspace")
+		if rb.config.Stats.Keyspace {
+			err = rb.exportStats("keyspace")
 			if err != nil {
 				logp.Err("Error reading keypsace stats: %v", err)
 				break
@@ -180,7 +180,7 @@ func (r *Redisbeat) Run(b *beat.Beat) error {
 
 		timerEnd := time.Now()
 		duration := timerEnd.Sub(timerStart)
-		if duration.Nanoseconds() > r.period.Nanoseconds() {
+		if duration.Nanoseconds() > rb.period.Nanoseconds() {
 			logp.Warn("Ignoring tick(s) due to processing taking longer than one period")
 		}
 	}
@@ -194,13 +194,13 @@ func (rb *Redisbeat) Cleanup(b *beat.Beat) error {
 }
 
 // Stop is triggered on exit, closing the done channel and redis pool
-func (r *Redisbeat) Stop() {
-	close(r.done)
-	r.redisPool.Close()
+func (rb *Redisbeat) Stop() {
+	close(rb.done)
+	rb.redisPool.Close()
 }
 
-func (r *Redisbeat) exportStats(statType string) error {
-	stats, err := r.getInfoReply(statType)
+func (rb *Redisbeat) exportStats(statType string) error {
+	stats, err := rb.getInfoReply(statType)
 	if err != nil {
 		logp.Warn("Failed to fetch server stats: %v", err)
 		return err
@@ -213,18 +213,18 @@ func (r *Redisbeat) exportStats(statType string) error {
 		"stats":      stats,
 	}
 
-	r.events.PublishEvent(event)
+	rb.events.PublishEvent(event)
 
 	return nil
 }
 
 // getInfoReply sends INFO type command and returns the response as a map
-func (r *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
-	c := r.redisPool.Get()
+func (rb *Redisbeat) getInfoReply(infoType string) (map[string]string, error) {
+	c := rb.redisPool.Get()
 	defer c.Close()
 
-	if r.config.Auth.Required {
-		authed, err := c.Do("AUTH", r.config.Auth.RequiredPass)
+	if rb.config.Auth.Required {
+		authed, err := c.Do("AUTH", rb.config.Auth.RequiredPass)
 		if err != nil {
 			return nil, err
 		} else {
